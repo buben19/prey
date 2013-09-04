@@ -19,7 +19,7 @@ comunicate with this supervisors, when deciding what should be started next.
 
 Supervisors also provide list of unblockers.
 
-# Task Parallelism
+### Task Parallelism
 
 Tasks belonging a sing supervisour can be runned in parallel. Supervisor keeps
 track of their count.
