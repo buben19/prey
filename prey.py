@@ -29,11 +29,6 @@ def main():
         webcrawler.WebCrawlerSupervisor(),
         1)
 
-    # debug
-    #import src.url as url
-    #sheduler.getProcess(webcrawler.WebCrawlerSupervisor).get(
-    #        url.Url("http://seznam.cz/"))
-
     sheduler.sheduleNext()
     twisted.internet.reactor.run()
 

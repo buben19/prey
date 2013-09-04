@@ -128,7 +128,8 @@ class RandomNmapSupervisor(NmapSupervisor):
         return NmapSupervisor.getRunningTaskCount(self) + self.__generatingAddressCount
 
     def getMaxTaskCount(self):
-        return 1
+        #return 1
+        return 3
 
 class QueuedNmapSupervisor(NmapSupervisor):
     """
@@ -246,6 +247,8 @@ class NmapTask(process.BaseTask):
         args = []
         args.append('nmap')
         args.extend(Config.processArgs)
+        if self.address.version == 6:
+            args.append('-6')
         args.append("-oX")
         args.append("-")
         args.append(unicode(self.address))
@@ -282,7 +285,7 @@ class NmapProtocol(twisted.internet.protocol.ProcessProtocol):
         self.outputStr = ""
 
     def makeConnection(self, process):
-        print "starting nmap with address:", str(self.address)
+        print "starting nmap with address:", unicode(self.address)
 
     def processExited(self, reason):
         self.deferred.callback(self.__parseOutput())
@@ -293,37 +296,11 @@ class NmapProtocol(twisted.internet.protocol.ProcessProtocol):
     def __parseOutput(self):
         return xml.etree.ElementTree.fromstring(self.outputStr)
 
-#class DeferredNmap(process.DeferredAction):
-#
-#    def action(self, address):
-#        self.task.address = address
-#        args = []
-#        args.append('nmap')
-#        args.extend(Config.processArgs)
-#        args.append("-oX")
-#        args.append("-")
-#        args.append(address)
-#
-#        # create protocol
-#        protocol = NmapProtocol(address)
-#
-#        # start process
-#        import twisted.internet.reactor
-#        twisted.internet.reactor.spawnProcess(
-#            protocol,
-#            Config.processPath,
-#            args)
-#
-#        # register callback
-#        self.task.newCallback(
-#            protocol.deferred,
-#            DeferredNmapOutput())
-
 class DeferredNmapOutput(process.DeferredAction):
 
     def action(self, rootElement):
         self.task.newCallback(
-            self.task.supervisor.hostRepository.generateHostId(),
+            self.task.supervisor.hostRepository.getHostId(self.task.address),
             DeferredHost(rootElement))
 
 class DeferredHost(process.DeferredAction):
@@ -601,7 +578,7 @@ class DeferredService(process.DeferredAction):
             self.__https()
 
     def __getPort(self):
-        return str(self.portElement.attrib['portid'])
+        return unicode(self.portElement.attrib['portid'])
 
     def __http(self):
         p = self.__getPort()
@@ -609,7 +586,7 @@ class DeferredService(process.DeferredAction):
             p = ''
         else:
             p = ':' + p
-        self.__url(url.Url('http://' + str(self.task.address) + p + '/'))
+        self.__url(url.Url('http://' + unicode(self.task.address) + p + '/'))
 
     def __https(self):
         p = self.__getPort()
@@ -617,7 +594,7 @@ class DeferredService(process.DeferredAction):
             p = ''
         else:
             p = ':' + p
-        self.__url(url.Url('https://' + str(self.task.address) + p + '/'))
+        self.__url(url.Url('https://' + unicode(self.task.address) + p + '/'))
 
     def __url(self, u):
         ServiceProvider.getInstance().getService(data.UrlDistributor).distribute(u)

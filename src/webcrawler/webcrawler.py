@@ -33,6 +33,8 @@ class WebCrawlerSupervisor(process.BaseProcess):
     # urls which are comparing with database, if the are useable
     __getUrls = None
 
+    __urlRootOnly = False
+
     # resolver used to resolve all domain names
     resolver = None
 
@@ -46,10 +48,15 @@ class WebCrawlerSupervisor(process.BaseProcess):
     addressDistributor = None
     urlDistributor = None
 
-    def __init__(self):
+    def __init__(self, urlRootOnly = False):
+        """
+        urlRootOnly - if True, get method will strip path, queries and fragments
+        and fetch only root url
+        """
         self.__urls = WebCrawlerQueue()
         self.__progressUrls = set()
         self.__getUrls = set()
+        self.__urlRootOnly = urlRootOnly
 
         # create resolver
         self.resolver = twisted.names.client.createResolver()
@@ -81,6 +88,10 @@ class WebCrawlerSupervisor(process.BaseProcess):
         return d
 
     def get(self, url):
+        if self.__urlRootOnly:
+            del url.query
+            del url.path
+            del url.fragment
         self.newUrl(url, 0)
 
     def getWaitingTaskCount(self):
@@ -289,10 +300,7 @@ class WebCrawlerTask(process.BaseTask):
                     if self.scanLevel < Config.webCrawlerScanLevel:
                         self.supervisor.newUrl(u, self.scanLevel + 1)
                 else:
-
-                    # TODO: implement disabling distributing
-                    if False:
-                        self.supervisor.urlDistributor.distribute(u)
+                    self.supervisor.urlDistributor.distribute(u)
 
     def saveUrls(self):
         """
@@ -414,9 +422,6 @@ class WebCrawlerTask(process.BaseTask):
         else:
             d.callback(None)
         return d
-
-#    def getPageTitle(self):
-#        return self.visitedUrls[-1].pageTitle
 
     def processNextUrl(self, url):
         self.__createUrlFrame(url)

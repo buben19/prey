@@ -130,7 +130,7 @@ class TaskBalancer(object):
                     maxTasks = Config.numMaxTasks - (len(tmp) + sheduler.getRunningTasksCount())
 
                     if maxTasks >= process.getMaxTaskCount():
-                        tmp.add(process.__class__, process.getMaxTaskCount())
+                        tmp.add(process.__class__, process.getMaxTaskCount() - process.getRunningTaskCount())
                     elif maxTasks < process.getWaitingTaskCount():
                         tmp.add(process.__class__, maxTasks)
                         break

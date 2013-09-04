@@ -14,7 +14,7 @@ class Defaults(object):
     #DB_MODULE = "pyPgSQL.PgSQL"
     DB_MODULE = "psycopg2"
     DB_HOST = "localhost"
-    DB_NAME = "prey_db"
+    DB_NAME = "prey_test_db"
     DB_USER = "prey"
     DB_PASS = "heslo"
 

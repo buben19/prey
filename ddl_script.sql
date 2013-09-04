@@ -4,10 +4,23 @@
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
-SET standard_conforming_strings = off;
+SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET escape_string_warning = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
 
 SET search_path = public, pg_catalog;
 
@@ -34,8 +47,8 @@ ALTER TABLE public.cpe OWNER TO prey;
 CREATE SEQUENCE seq_hostname_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -196,8 +209,8 @@ COMMENT ON COLUMN ports.state IS '''O'' - open, ''C'' - closed';
 CREATE SEQUENCE seq_script_result_element_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -224,8 +237,8 @@ ALTER TABLE public.script_result_elements OWNER TO prey;
 CREATE SEQUENCE seq_script_result_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -253,8 +266,8 @@ ALTER TABLE public.script_results OWNER TO prey;
 CREATE SEQUENCE seq_cpe_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -267,8 +280,8 @@ ALTER TABLE public.seq_cpe_id OWNER TO prey;
 CREATE SEQUENCE seq_host_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -281,8 +294,8 @@ ALTER TABLE public.seq_host_id OWNER TO prey;
 CREATE SEQUENCE seq_os_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -295,8 +308,8 @@ ALTER TABLE public.seq_os_id OWNER TO prey;
 CREATE SEQUENCE seq_osclass_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -309,8 +322,8 @@ ALTER TABLE public.seq_osclass_id OWNER TO prey;
 CREATE SEQUENCE seq_osmatch_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -323,8 +336,8 @@ ALTER TABLE public.seq_osmatch_id OWNER TO prey;
 CREATE SEQUENCE seq_page_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -337,8 +350,8 @@ ALTER TABLE public.seq_page_id OWNER TO prey;
 CREATE SEQUENCE seq_url_id
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
@@ -406,7 +419,7 @@ CREATE TABLE url_queries (
     url_id numeric(8,0) NOT NULL,
     key character varying(45) NOT NULL,
     value character varying(128),
-    "order" numeric(3,0) NOT NULL
+    order_num numeric(3,0) NOT NULL
 );
 
 

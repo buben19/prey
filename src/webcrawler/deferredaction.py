@@ -410,7 +410,7 @@ class DeferredPageAlreadyFetched(DeferredPageFetchBase):
                 self.__getRedirectUrlId)
 
     def __getRedirectUrlId(self, result):
-        self.task.redirectUrlId(result[0][0])
+        self.task.lastVisited().redirectUrlId = result[0][0]
         self.task.saveUrls().addCallback(
             self.__saveUrls)
 
