@@ -6,6 +6,7 @@ from .. import address
 from .. import url
 from .. import repository
 from .. import data
+from ..shedule import Sheduler
 import os.path
 import twisted.internet.protocol
 import xml.etree.ElementTree
@@ -154,6 +155,10 @@ class QueuedNmapSupervisor(NmapSupervisor):
         # register to distributor
         ServiceProvider.getInstance().getService(data.AddressDistributor).registerConsumer(self)
 
+        # get all non-scanned addresses from database
+        self.hostRepository.getNonScannedAddresses().addCallback(
+            DeferredNonScannedAddresses(self))
+
     def runTask(self):
         d = twisted.internet.defer.Deferred()
         self.newTask(
@@ -175,11 +180,26 @@ class QueuedNmapSupervisor(NmapSupervisor):
         def c(isUseable, address):
             self.__getAddresses.remove(address)
             if isUseable:
-                self.__addressQueue.append(address)
+                self.newAddress(address)
         if not address in self.addressesInProgress and \
                 not address in self.addressRegistration:
             self.__getAddresses.add(address)
             self.useableRepository.isUseable(address).addCallback(c, address)
+
+    def newAddress(self, address):
+        self.__addressQueue.append(address)
+        ServiceProvider.getInstance().getService(Sheduler).sheduleNext()
+
+class DeferredNonScannedAddresses(object):
+
+    supervisor = None
+
+    def __init__(self, supervisor):
+        self.supervisor = supervisor
+
+    def __call__(self, addresses):
+        for address in addresses:
+            self.supervisor.newAddress(address)
 
 class AddressesInProgress(set):
     """
@@ -387,10 +407,11 @@ class DeferredHostUp(process.DeferredAction):
                 portElement))
 
     def __os(self, osElement):
-        self.task.newCallback(
-            self.task.supervisor.osRepository.createOsId(
-                self.task.hostId),
-            DeferredOs(osElement))
+        if osElement is not None:
+            self.task.newCallback(
+                self.task.supervisor.osRepository.createOsId(
+                    self.task.hostId),
+                DeferredOs(osElement))
 
     def action(self, result):
         host = self.rootElement.find('host')

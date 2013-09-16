@@ -24,4 +24,6 @@ Supervisors also provide list of unblockers.
 Tasks belonging a sing supervisour can be runned in parallel. Supervisor keeps
 track of their count.
 
+### Note
+
 this project is under heavy development

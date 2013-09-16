@@ -129,7 +129,12 @@ class TaskBalancer(object):
                 if (len(tmp) + sheduler.getRunningTasksCount()) < Config.numMaxTasks:
                     maxTasks = Config.numMaxTasks - (len(tmp) + sheduler.getRunningTasksCount())
 
-                    if maxTasks >= process.getMaxTaskCount():
+                    if maxTasks >= process.getWaitingTaskCount():
+                        if process.getMaxTaskCount() < process.getWaitingTaskCount():
+                            tmp.add(process.__class__, process.getMaxTaskCount())
+                        else:
+                            tmp.add(process.__class__, process.getWaitingTaskCount())
+                    elif maxTasks >= process.getMaxTaskCount():
                         tmp.add(process.__class__, process.getMaxTaskCount() - process.getRunningTaskCount())
                     elif maxTasks < process.getWaitingTaskCount():
                         tmp.add(process.__class__, maxTasks)

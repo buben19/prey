@@ -168,15 +168,13 @@ class HostRepository(BaseRepository):
             where address like %s",
             (unicode(address),))
 
-    def getNonScannedHosts(self):
+    def getNonScannedAddresses(self):
         """
         return list of addresses which are marked as non-scanned
         """
         def c(result):
-            l = []
-            for i in result:
-                l.append(address.Address(i['address']))
-            return l
+            for row in result:
+                yield address.Address(row[0])
         d = self.dbpool.runQuery(
             "select \
                 address \
