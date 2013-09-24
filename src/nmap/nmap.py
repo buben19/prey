@@ -267,6 +267,7 @@ class NmapTask(process.BaseTask):
         args = []
         args.append('nmap')
         args.extend(Config.processArgs)
+        args.append("-vv")
         if self.address.version == 6:
             args.append('-6')
         args.append("-oX")
@@ -334,8 +335,7 @@ class DeferredHost(process.DeferredAction):
         """
         determine if scanned host is up
         """
-        for runstats in self.rootElement.iter('runstats'):
-            return bool(int(runstats.find('hosts').attrib['up']))
+        return self.rootElement.find('host').find('status').attrib['state'].lower() == "up"
 
     def action(self, hostId):
         self.task.hostId = hostId
@@ -364,24 +364,23 @@ class DeferredHostUp(process.DeferredAction):
     def __init__(self, rootElement):
         self.rootElement = rootElement
 
-    def __hostnames(self, host):
+    def __hostnames(self, hostnames):
         """
         process information about hostnames
         """
-        for hostnames in host.iter('hostnames'):
-            for hostname in hostnames.iter('hostname'):
-                self.task.newCallback(
-                    self.task.supervisor.hostnameRepository.saveHostname(
-                        self.task.hostId,
-                        hostname.attrib['name'],
-                        hostname.attrib['type']),
-                    DeferredHostname())
+        for hostname in hostnames.findall('hostname'):
+            self.task.newCallback(
+                self.task.supervisor.hostnameRepository.saveHostname(
+                    self.task.hostId,
+                    hostname.attrib['name'],
+                    hostname.attrib['type']),
+                DeferredHostname())
 
     def __ports(self, ports):
         """
         process information about scanned ports
         """
-        for port in ports.iter('port'):
+        for port in ports.findall('port'):
             self.__port(port)
 
     def __port(self, portElement):
@@ -415,9 +414,18 @@ class DeferredHostUp(process.DeferredAction):
 
     def action(self, result):
         host = self.rootElement.find('host')
-        self.__hostnames(host)
-        self.__ports(host.find('ports'))
-        self.__os(host.find('os'))
+
+        hostnames = host.find('hostnames')
+        if hostnames is not None:
+            self.__hostnames(hostnames)
+
+        ports = host.find('ports')
+        if ports is not None:
+            self.__ports(ports)
+
+        os = host.find('os')
+        if os is not None:
+            self.__os(os)
 
 class DeferredOs(process.DeferredAction):
 
@@ -630,7 +638,7 @@ class DeferredCpe(process.DeferredAction):
         self.serviceElement = serviceElement
 
     def action(self, reason):
-        for cpeElement in self.serviceElement.iter('cpe'):
+        for cpeElement in self.serviceElement.findall('cpe'):
             self.task.newCallback(
                 self.task.supervisor.serviceRepository.saveCpe(
                     self.task.hostId,
@@ -652,7 +660,7 @@ class DeferredScript(process.DeferredAction):
         self.portElement = portElement
 
     def action(self, reason):
-        for script in self.portElement.iter('script'):
+        for script in self.portElement.findall('script'):
 
             # check if script run succesfully
             if script.attrib['output'] != 'ERROR: Script execution failed (use -d to debug)':
@@ -693,7 +701,7 @@ class DeferredScriptElement(process.DeferredAction):
         self.scriptElement = scriptElement
 
     def action(self, result):
-        for element in self.scriptElement.iter('elem'):
+        for element in self.scriptElement.findall('elem'):
             self.task.newCallback(
                 self.task.supervisor.portRepository.saveScriptResultElement(
                     self.scriptResultId,
