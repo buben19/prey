@@ -535,7 +535,7 @@ class Url(object):
     @explicitPort.setter
     def explicitPort(self, explicitPort):
         if not self.hasStandardPort():
-            raise AttributeError, "port is not standard, cen't be changed"
+            raise AttributeError, "port is not standard, can't be changed"
         self.__explicitPort = self.__boolAttribute(explicitPort)
 
     def hasStandardPort(self):

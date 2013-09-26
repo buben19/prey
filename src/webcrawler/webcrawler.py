@@ -88,7 +88,7 @@ class WebCrawlerSupervisor(process.BaseProcess):
         """
         for address, port, serviceName in results:
             fetchUrl = url.Url(serviceName + '://' + address + ':' + unicode(port))
-            if fetchUrl.hasStandardPort:
+            if fetchUrl.hasStandardPort():
                 fetchUrl.explicitPort = False
             self.newUrl(fetchUrl, 0)
 
