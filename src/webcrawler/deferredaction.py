@@ -234,7 +234,7 @@ class DeferredPageSuccess(process.DeferredAction):
 
         # url is visited in this task - infinite redirection
         # get urlId of location and store it in lastVisited structure
-        self.task.lastVisited().redirectUrlId = self.task.getUrl(location)
+        self.task.lastVisited().redirectUrlId = self.task.getUrlId(location)
         self.task.setAdditionalInfo("error", "inifinite redirection loop")
         self.task.newCallback(
             twisted.internet.defer.succeed(None),
