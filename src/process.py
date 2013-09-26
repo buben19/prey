@@ -1,12 +1,13 @@
-import zope.interface
+from zope.interface import implementer
 import interfaces
 import services
 import twisted.python.failure
 import sys
 
-class BaseProcess(object):
 
-    zope.interface.implements(interfaces.IProcess, interfaces.IConsumer)
+
+@implementer(interfaces.IProcess)
+class BaseProcess(object):
 
     runningTasks = None
 

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 from python.orderedmultidict import omdict
 
-
+# TODO: move these tool into utils package
 class ObjectMultiplier(object):
     """
     multiple object instances by integer

@@ -335,7 +335,13 @@ class DeferredHost(process.DeferredAction):
         """
         determine if scanned host is up
         """
-        return self.rootElement.find('host').find('status').attrib['state'].lower() == "up"
+        try:
+            return self.rootElement.find('host').find('status').attrib['state'].lower() == "up"
+        except AttributeError:
+
+            # raised when host sub-element doesn't exists
+            # (find('status') is called at NoneType)
+            return False
 
     def action(self, hostId):
         self.task.hostId = hostId

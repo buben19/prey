@@ -225,23 +225,25 @@ class DeferredPageSuccess(process.DeferredAction):
 
     def redirectWithLocation(self, page, location):
         if self.task.isUrlVisited(location):
-            self.urlVisited(page)
+            self.urlVisited(location)
         else:
-            self.urlNotVisited(page, location)
+            self.urlNotVisited(location)
 
-    def urlVisited(self, page):
+    def urlVisited(self, location):
         print "infinite redirection"
 
         # url is visited in this task - infinite redirection
-        self.task.redirectUrlId(self.task.lastVisited().urlId)
+        # get urlId of location and store it in lastVisited structure
+        self.task.lastVisited().redirectUrlId = self.task.getUrl(location)
         self.task.setAdditionalInfo("error", "inifinite redirection loop")
         self.task.newCallback(
             twisted.internet.defer.succeed(None),
             DeferredPageFetchError())
 
-    def urlNotVisited(self, page, location):
+    def urlNotVisited(self, location):
 
         # not visited
+        # look into database, if new url were fetched in the past
         self.task.newCallback(
             self.task.supervisor.wwwPageRepository.isPageFetched(location),
             DeferredIsPageFetchedTest(

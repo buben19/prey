@@ -698,6 +698,23 @@ class WWWPageRepository(BaseRepository):
                 infoClass,
                 message))
 
+    def getNonFetchedAddresses(self):
+        """
+        get those addresses, on which is running service named 'http' of 'https'
+        and which has not been fetched (addresses arent associatd with any url)
+        """
+        return self.dbpool.runQuery(
+            "select \
+                    hosts.address, \
+                    services.port, \
+                    services.name \
+                from hosts \
+                join services on (hosts.id = services.host_id) \
+                left join urls_resolved_to_hosts on (hosts.id = urls_resolved_to_hosts.host_id) \
+                left join www_page_located_at_urls on (urls_resolved_to_hosts.url_id = www_page_located_at_urls.url_id) \
+                left join www_pages on (www_page_located_at_urls.page_id = www_pages.id) \
+                where (services.name ilike 'http' or services.name ilike 'https') and urls_resolved_to_hosts.host_id is null")
+
 class _DeferredUrlQueries(object):
 
     repository = None

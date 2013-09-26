@@ -1,0 +1,3 @@
+2013-06-30 18:13:45+0200 [-] Log opened.
+2013-06-30 18:13:45+0200 [-] --> test_generator.TestRandomIPV4AddressGenerator.test_generate <--
+2013-06-30 18:13:46+0200 [-] --> test_generator.TestValidIPV4AddressGenerator.test_generate <--

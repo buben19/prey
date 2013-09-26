@@ -10,6 +10,7 @@ from .. import shedule
 from _visitedurl import _VisitedUrl
 from queue import WebCrawlerQueue
 from ..http.fetch import PageFetchConfig, PageFetcher
+from ..address import Address
 import twisted.web.client
 import twisted.internet.defer
 import twisted.internet.ssl
@@ -33,7 +34,9 @@ class WebCrawlerSupervisor(process.BaseProcess):
     # urls which are comparing with database, if the are useable
     __getUrls = None
 
-    __urlRootOnly = False
+    # if True, web crawler will strip all url components and fetch only root
+    # url
+    __rootUrlOnly = False
 
     # resolver used to resolve all domain names
     resolver = None
@@ -48,7 +51,7 @@ class WebCrawlerSupervisor(process.BaseProcess):
     addressDistributor = None
     urlDistributor = None
 
-    def __init__(self, urlRootOnly = False):
+    def __init__(self, rootUrlOnly = False):
         """
         urlRootOnly - if True, get method will strip path, queries and fragments
         and fetch only root url
@@ -56,7 +59,7 @@ class WebCrawlerSupervisor(process.BaseProcess):
         self.__urls = WebCrawlerQueue()
         self.__progressUrls = set()
         self.__getUrls = set()
-        self.__urlRootOnly = urlRootOnly
+        self.__rootUrlOnly = rootUrlOnly
 
         # create resolver
         self.resolver = twisted.names.client.createResolver()
@@ -75,6 +78,20 @@ class WebCrawlerSupervisor(process.BaseProcess):
         # register self for consuming urls
         self.urlDistributor.registerConsumer(self)
 
+        # get non-fetched addresses from the repository and fetch them
+        self.wwwPageRepository.getNonFetchedAddresses().addCallback(
+            self.__nonFetchedAddresses)
+
+    def __nonFetchedAddresses(self, results):
+        """
+        add addresses into fetch queue
+        """
+        for address, port, serviceName in results:
+            fetchUrl = url.Url(serviceName + '://' + address + ':' + unicode(port))
+            if fetchUrl.hasStandardPort:
+                fetchUrl.explicitPort = False
+            self.newUrl(fetchUrl, 0)
+
     def runTask(self):
         d = twisted.internet.defer.Deferred()
         try:
@@ -88,7 +105,7 @@ class WebCrawlerSupervisor(process.BaseProcess):
         return d
 
     def get(self, url):
-        if self.__urlRootOnly:
+        if self.__rootUrlOnly:
             del url.query
             del url.path
             del url.fragment
