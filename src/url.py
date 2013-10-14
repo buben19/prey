@@ -644,10 +644,11 @@ class Url(object):
         """
 
     @classmethod
-    def fromString(cls, rawString):
+    def fromString(cls, urlString):
         """
-        retin marity with orher url componenets
+        return url created from string
         """
+        return cls(urlString)
 
 class _UrlPackage(object):
     """
